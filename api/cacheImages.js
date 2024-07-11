@@ -2,11 +2,21 @@ const fetch = require('node-fetch');
 const { Client } = require('pg');
 const { put } = require('@vercel/blob');
 
+// Initialize the Postgres client
 const pgClient = new Client({
   connectionString: process.env.POSTGRES_URL,
   ssl: { rejectUnauthorized: false }
 });
 pgClient.connect();
+
+// Function to upload image to Vercel Blob
+async function uploadToBlob(fileName, buffer) {
+  const blob = await put(fileName, buffer, {
+    access: 'public',
+    token: process.env.BLOB_READ_WRITE_TOKEN
+  });
+  return blob.url;
+}
 
 module.exports = async (req, res) => {
   const { urls } = req.query;
@@ -19,7 +29,6 @@ module.exports = async (req, res) => {
 
   for (const url of urlList) {
     try {
-      // Adjusted the URL to fetch from the correct endpoint
       const imageUrl = `https://image.pollinations.ai/prompt/${url}`;
       const response = await fetch(imageUrl);
       if (response.ok) {
@@ -28,12 +37,9 @@ module.exports = async (req, res) => {
           const buffer = await response.buffer();
           const fileExtension = contentType.split('/')[1];
           const fileName = `image-${url.split('/').pop().split('.')[0]}.${fileExtension}`;
-          const blob = await put(fileName, buffer, {
-            access: 'public',
-            token: process.env.BLOB_READ_WRITE_TOKEN
-          });
+          const blobUrl = await uploadToBlob(fileName, buffer);
 
-          const blobUrl = blob.url;
+          // Save metadata to Vercel Postgres
           await pgClient.query(
             'INSERT INTO images (url, blob_url) VALUES ($1, $2)',
             [imageUrl, blobUrl]
