@@ -19,7 +19,9 @@ module.exports = async (req, res) => {
 
   for (const url of urlList) {
     try {
-      const response = await fetch(url);
+      // Adjusted the URL to fetch from the correct endpoint
+      const imageUrl = `https://image.pollinations.ai/prompt/${url}`;
+      const response = await fetch(imageUrl);
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.startsWith('image/')) {
@@ -34,10 +36,10 @@ module.exports = async (req, res) => {
           const blobUrl = blob.url;
           await pgClient.query(
             'INSERT INTO images (url, blob_url) VALUES ($1, $2)',
-            [url, blobUrl]
+            [imageUrl, blobUrl]
           );
 
-          results.push({ url, blobUrl });
+          results.push({ url: imageUrl, blobUrl });
         } else {
           console.error(`URL is not an image: ${url}`);
         }
