@@ -4,10 +4,8 @@
     { "src": "api/cacheImages.js", "use": "@vercel/node" }
   ],
   "rewrites": [
-    { "source": "/proxy/:match/:url*", "destination": "https://:match/:url*" },
-    { "source": "/proxy/:match/:url*/", "destination": "https://:match/:url*/" },
-    { "source": "/httpproxy/:match/:url*", "destination": "http://:match/:url*" },
-    { "source": "/httpproxy/:match/:url*/", "destination": "http://:match/:url*/" },
+    { "source": "/proxy/:url*", "destination": "https://:url*" },
+    { "source": "/httpproxy/:url*", "destination": "http://:url*" },
     { "source": "/proxy-images", "destination": "/api/cacheImages" }
   ]
 }
