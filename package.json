@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "node-fetch": "^2.6.1",
+    "@vercel/blob": "^1.0.0",
+    "@vercel/postgres": "^1.0.0"
+  }
+}
