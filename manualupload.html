@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        #fileList {
+            margin-top: 20px;
+        }
+        #fileList a {
+            display: block;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Files</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="files" multiple>
+        <button type="submit">Upload</button>
+    </form>
+    <div id="progress"></div>
+    <h2>Uploaded Files</h2>
+    <div id="fileList"></div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const progressDiv = document.getElementById('progress');
+        const fileListDiv = document.getElementById('fileList');
+
+        form.addEventListener('submit', async (e) => {
+           e.preventDefault();
+           const files = fileInput.files;
+           if (files.length === 0) {
+               alert('Please select files to upload.');
+               return;
+           }
+
+           const formData = new FormData();
+           for (let file of files) {
+               formData.append('files', file);
+           }
+
+           try {
+               const response = await fetch('/api/upload', {
+                   method: 'POST',
+                   body: formData
+               });
+
+               const result = await response.json();
+               if (response.ok) {
+                   progressDiv.textContent = 'Upload complete!';
+                   result.files.forEach(file => {
+                       const link = document.createElement('a');
+                       link.href = file.url;
+                       link.textContent = file.name;
+                       link.target = '_blank';
+                       fileListDiv.appendChild(link);
+                   });
+               } else {
+                   progressDiv.textContent = 'Upload failed: ' + result.error;
+               }
+           } catch (error) {
+               progressDiv.textContent = 'Upload error: ' + error.message;
+           }
+        });
+    </script>
+</body>
+</html>

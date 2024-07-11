@@ -1,12 +1,23 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/cacheImages.js", "use": "@vercel/node" }
+    {"src": "api/cacheImages.js", "use": "@vercel/node"},
+    {"src": "api/upload.js", "use": "@vercel/node"}
+  ],
+  "routes": [
+    {
+      "src": "/api/upload",
+      "dest": "api/upload.js"
+    },
+    {
+      "src": "/manualupload",
+      "dest": "/manualupload.html"
+    }
   ],
   "rewrites": [
-    { "source": "/proxy/:match/:url*", "destination": "https://:match/:url*" },
-    { "source": "/proxy/:match/:url*/", "destination": "https://:match/:url*/" },
-    { "source": "/httpproxy/:match/:url*", "destination": "http://:match/:url*" },
-    { "source": "/httpproxy/:match/:url*/", "destination": "http://:match/:url*/" }
+    {"source": "/proxy/:match/:url*", "destination": "https://:match/:url*"},
+    {"source": "/proxy/:match/:url*/", "destination": "https://:match/:url*/"},
+    {"source": "/httpproxy/:match/:url*", "destination": "http://:match/:url*"},
+    {"source": "/httpproxy/:match/:url*/", "destination": "http://:match/:url*/"}
   ]
 }
