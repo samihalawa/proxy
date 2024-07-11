@@ -1,10 +1,17 @@
 const fetch = require('node-fetch');
-const { createClient } = require('@vercel/postgres');
+const { createClient } = require('@supabase/supabase-js');
+const { Client } = require('pg');
 const { put } = require('@vercel/blob');
 
-const postgresUrl = process.env.POSTGRES_URL;
-const postgresClient = createClient({ connectionString: postgresUrl });
-const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+const supabaseUrl = 'https://wqhyfotqobtrtxsjmkmr.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxaHlmb3Rxb2J0cnR4c2pta21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcwMTcyMjIsImV4cCI6MjAzMjU5MzIyMn0.g23QzTWZG5f2UPbXys_1LOqI0tsAvqOOSO5M4XeRfYQ';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const pgClient = new Client({
+  connectionString: process.env.POSTGRES_URL,
+  ssl: { rejectUnauthorized: false }
+});
+pgClient.connect();
 
 module.exports = async (req, res) => {
   const { urls } = req.query;
@@ -23,19 +30,19 @@ module.exports = async (req, res) => {
         if (contentType && contentType.startsWith('image/')) {
           const buffer = await response.buffer();
           const fileExtension = contentType.split('/')[1];
-          const fileName = `image-${url.split('/').pop()}.${fileExtension}`;
+          const prompt = url.split('/').pop().split('.')[0];
+          const fileName = `image-${prompt}.${fileExtension}`;
           const blobResponse = await put(fileName, buffer, {
             access: 'public',
-            token: blobToken
+            token: process.env.BLOB_READ_WRITE_TOKEN
           });
 
           const blobUrl = blobResponse.url;
-          const prompt = url.split('/').pop();
 
-          await postgresClient.sql`
-            INSERT INTO images (url, blob_url, prompt)
-            VALUES (${url}, ${blobUrl}, ${prompt})
-          `;
+          await pgClient.query(
+            'INSERT INTO images (url, blob_url, prompt) VALUES ($1, $2, $3)',
+            [url, blobUrl, prompt]
+          );
 
           results.push({ url, blobUrl, prompt });
         } else {
