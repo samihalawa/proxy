@@ -10,16 +10,3 @@
     { "source": "/httpproxy/:match/:url*/", "destination": "http://:match/:url*/" }
   ]
 }
-{
-  "dependencies": {
-    "node-fetch": "^2.6.1",
-    "pg": "^8.7.1",
-    "@vercel/blob": "^1.0.0"
-  },
-  "scripts": {
-    "build": "next build",
-    "start": "next start",
-    "dev": "next dev"
-  }
-}
-
