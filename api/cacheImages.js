@@ -13,7 +13,13 @@ module.exports = async (req, res) => {
     try {
       const response = await fetch(url);
       if (response.ok) {
-        results.push(url);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.startsWith('image/')) {
+          // Push the URL to the results if it is an image
+          results.push(url);
+        } else {
+          console.error(`URL is not an image: ${url}`);
+        }
       } else {
         console.error(`Failed to fetch ${url}: ${response.statusText}`);
       }
